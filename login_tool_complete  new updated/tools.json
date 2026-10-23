@@ -1,0 +1,283 @@
+{
+  "panel_version": "1.0",
+  "tools": [
+    {
+      "id": "login",
+      "label": "IG Login (main tool)",
+      "script": "ig_login_perdevice.py",
+      "desc": "Single account login — per-device fingerprint, proxy/country support, 2FA TOTP auto-complete (2026 CAA flow)",
+      "fields": [
+        {
+          "name": "username",
+          "label": "Username",
+          "type": "text",
+          "required": true,
+          "arg": "--username",
+          "ph": "jaise social4594"
+        },
+        {
+          "name": "password",
+          "label": "Password",
+          "type": "password",
+          "required": true,
+          "arg": "--password",
+          "ph": "account ka password"
+        },
+        {
+          "name": "totp",
+          "label": "TOTP Secret (2FA)",
+          "type": "text",
+          "arg": "--totp-secret",
+          "ph": "4BOY TBGK RGUO ... (spaces chalega)",
+          "help": "Authenticator app ki base32 secret key. 2FA wale accounts ke liye zaroori — code panel khud banayega."
+        },
+        {
+          "name": "country",
+          "label": "Country",
+          "type": "select",
+          "options": [
+            "AUTO",
+            "IN",
+            "PH",
+            "US_EST",
+            "US_PST",
+            "UK"
+          ],
+          "arg": "--country",
+          "help": "AUTO = proxy URL se country auto-detect (IPRoyal _country-XX / DataImpulse cr.xx); bina proxy = IN. Explicit chunna ho to account ki country — proxy exit se match honi chahiye."
+        },
+        {
+          "name": "proxy",
+          "label": "Proxy (optional)",
+          "type": "text",
+          "arg": "--proxy",
+          "ph": "http://user:pass@gw.dataimpulse.com:10005",
+          "help": "Khali chhoda to apni direct IP se chalega. STICKY zaroori hai: DataImpulse gw.dataimpulse.com ports 10000-20000 (sessid username me), ya old IPRoyal gateway geo.iproyal.com:12321 (_country-in_session-X_lifetime-30m). Rotating (port 823) se 429 aata hai."
+        },
+        {
+          "name": "output",
+          "label": "Output filename (optional)",
+          "type": "text",
+          "arg": "--output",
+          "ph": "cookies_mereaccount.json",
+          "help": "Khali = cookies_<username>.json"
+        },
+        {
+          "name": "web",
+          "label": "Web cookies bhi lao (csrftoken wagera)",
+          "type": "flag",
+          "arg": "--web-cookies",
+          "help": "Default OFF. Sirf tab ON karo jab session web-automation me use karni ho."
+        },
+        {
+          "name": "force",
+          "label": "Force (cooldown lock ignore — recommended NAHI)",
+          "type": "flag",
+          "arg": "--force",
+          "help": "GENERIC_ERROR ke baad 12h, FALLBACK ke baad 1h, 429 ke baad 45min ka auto-lock lagta hai. Force = lock bypass (sirf ek attempt)."
+        },
+        {
+          "name": "app_profile",
+          "label": "App Profile (version identity)",
+          "type": "select",
+          "options": [
+            "449",
+            "451",
+            "448"
+          ],
+          "arg": "--app-profile",
+          "help": "449 = DEFAULT (consistent identity: templates ka bloks hash 449 ka, instagrapi + instagram-cli Oct 2026 bhi 449 chalate hain, Pixel 8 Pro Android 14 device auto-apply). 451 = experimental (inconsistent hash). 448 = purana."
+        },
+        {
+          "name": "tls",
+          "label": "TLS engine",
+          "type": "select",
+          "options": [
+            "auto",
+            "curl",
+            "requests"
+          ],
+          "arg": "--tls",
+          "help": "auto = uTLS (curl_cffi) agar installed — RECOMMENDED. Proxy pe send_login 429-0B aaye to: pip install \"curl_cffi>=0.15.0\""
+        }
+      ],
+      "status_rules": [
+        {
+          "pattern": "\\[SESSION VALID\\]",
+          "status": "SUCCESS"
+        },
+        {
+          "pattern": "restricted/suspended",
+          "status": "SUSPENDED"
+        },
+        {
+          "pattern": "WRONG PASSWORD",
+          "status": "WRONG_PASSWORD"
+        },
+        {
+          "pattern": "USERNAME NOT FOUND",
+          "status": "NOT_FOUND"
+        },
+        {
+          "pattern": "ACCOUNT RECOVERY SCREEN",
+          "status": "RECOVERY"
+        },
+        {
+          "pattern": "CHECKPOINT/CHALLENGE",
+          "status": "CHALLENGE"
+        },
+        {
+          "pattern": "send_login par 429",
+          "status": "THROTTLED"
+        },
+        {
+          "pattern": "credentials nahi mile",
+          "status": "2FA_FAIL"
+        },
+        {
+          "pattern": "GENERIC_ERROR —",
+          "status": "GENERIC_ERROR"
+        },
+        {
+          "pattern": "CAA_LOGIN_FALLBACK —",
+          "status": "FALLBACK"
+        }
+      ]
+    },
+    {
+      "id": "login_simple",
+      "label": "IG Login (simple, bina device-pool)",
+      "script": "ig_login.py",
+      "desc": "Simple single-account login (static device, bina proxy support ke)",
+      "fields": [
+        {
+          "name": "username",
+          "label": "Username",
+          "type": "text",
+          "required": true,
+          "arg": "--username"
+        },
+        {
+          "name": "password",
+          "label": "Password",
+          "type": "password",
+          "required": true,
+          "arg": "--password"
+        },
+        {
+          "name": "totp",
+          "label": "TOTP Secret (2FA)",
+          "type": "text",
+          "arg": "--totp-secret",
+          "help": "2FA wale accounts ke liye base32 secret"
+        },
+        {
+          "name": "force",
+          "label": "Force (cooldown lock ignore — recommended NAHI)",
+          "type": "flag",
+          "arg": "--force",
+          "help": "GENERIC_ERROR ke baad 12h, FALLBACK ke baad 1h, 429 ke baad 45min ka auto-lock lagta hai. Force = lock bypass (sirf ek attempt)."
+        },
+        {
+          "name": "app_profile",
+          "label": "App Profile (version identity)",
+          "type": "select",
+          "options": [
+            "449",
+            "451",
+            "448"
+          ],
+          "arg": "--app-profile",
+          "help": "449 = DEFAULT (consistent identity: templates ka bloks hash 449 ka, instagrapi + instagram-cli Oct 2026 bhi 449 chalate hain, Pixel 8 Pro Android 14 device auto-apply). 451 = experimental (inconsistent hash). 448 = purana."
+        },
+        {
+          "name": "tls",
+          "label": "TLS engine",
+          "type": "select",
+          "options": [
+            "auto",
+            "curl",
+            "requests"
+          ],
+          "arg": "--tls",
+          "help": "auto = uTLS (curl_cffi) agar installed — RECOMMENDED. Proxy pe send_login 429-0B aaye to: pip install \"curl_cffi>=0.15.0\""
+        }
+      ],
+      "status_rules": [
+        {
+          "pattern": "\\[SESSION VALID\\]",
+          "status": "SUCCESS"
+        },
+        {
+          "pattern": "restricted/suspended",
+          "status": "SUSPENDED"
+        },
+        {
+          "pattern": "WRONG PASSWORD",
+          "status": "WRONG_PASSWORD"
+        },
+        {
+          "pattern": "USERNAME NOT FOUND",
+          "status": "NOT_FOUND"
+        },
+        {
+          "pattern": "ACCOUNT RECOVERY SCREEN",
+          "status": "RECOVERY"
+        },
+        {
+          "pattern": "CHECKPOINT/CHALLENGE",
+          "status": "CHALLENGE"
+        },
+        {
+          "pattern": "send_login par 429",
+          "status": "THROTTLED"
+        },
+        {
+          "pattern": "credentials nahi mile",
+          "status": "2FA_FAIL"
+        },
+        {
+          "pattern": "GENERIC_ERROR —",
+          "status": "GENERIC_ERROR"
+        },
+        {
+          "pattern": "CAA_LOGIN_FALLBACK —",
+          "status": "FALLBACK"
+        }
+      ]
+    },
+    {
+      "id": "check_cookies",
+      "label": "Cookies Check (session zinda hai?)",
+      "script": "check_cookies.py",
+      "desc": "Saved cookies file check karo — session alive hai ya dead",
+      "fields": [
+        {
+          "name": "file",
+          "label": "Cookies file (optional)",
+          "type": "text",
+          "positional": true,
+          "ph": "cookies_social4594.json",
+          "help": "Khali = cookies.json check hoti hai"
+        }
+      ],
+      "status_rules": []
+    },
+    {
+      "id": "batch",
+      "label": "Batch Login (pending accounts)",
+      "script": "batch_login_uk.py",
+      "desc": "Pending accounts ka batch login (apni proxy list se)",
+      "fields": [
+        {
+          "name": "count",
+          "label": "Kitne accounts (optional)",
+          "type": "text",
+          "positional": true,
+          "ph": "5"
+        }
+      ],
+      "status_rules": []
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "_help": "Naya tool jodne ke liye 'tools' me ek block add karo. Kisi tool ko update karna ho to sirf uski folder/block badlo - baaki tools par asar nahi. Field types: text, password, select(+options), flag, multi(+options). 'arg' = CLI flag, 'positional' = bina flag value, 'fixed' = hamesha lagne wale args. 'actions_file' = tool ki apni JSON jisme actions likhe hon (panel.py wali tools.json jaisi).",
+  "tools": [
+    {
+      "id": "login",
+      "label": "Login Tool",
+      "icon": "🔐",
+      "color": "#7c5cff",
+      "folder": "login_tool_complete  new updated",
+      "desc": "Instagram login, 2FA, cookies, batch login",
+      "actions_file": "tools.json",
+      "actions": []
+    },
+    {
+      "id": "uploader",
+      "label": "Post Uploader",
+      "icon": "📤",
+      "color": "#ff5c9d",
+      "folder": "Post uploader",
+      "desc": "Bio / DP / Post / Story uploads, profile control, experiments",
+      "actions": [
+        {
+          "id": "list",
+          "label": "List accounts + inventory",
+          "script": "ig_runner.py",
+          "fixed": ["list"],
+          "fields": []
+        },
+        {
+          "id": "run",
+          "label": "Runner (bio/dp/post/story...)",
+          "script": "ig_runner.py",
+          "desc": "Ek ya zyada actions chuno. Account khali = cookies/ ke sab accounts.",
+          "fields": [
+            {"name": "actions", "label": "Actions", "type": "multi", "required": true, "positional": true,
+             "options": ["info", "bio", "dp", "post", "story", "private", "public"]},
+            {"name": "account", "label": "Account (optional)", "type": "text", "arg": "--account", "ph": "jaise social4594"},
+            {"name": "count", "label": "Count (post/story)", "type": "text", "arg": "--count", "ph": "1"},
+            {"name": "caption", "label": "Caption", "type": "text", "arg": "--caption"}
+          ]
+        },
+        {
+          "id": "check_cookies",
+          "label": "Cookies check",
+          "script": "check_cookies.py",
+          "fields": [
+            {"name": "file", "label": "Cookies file (optional)", "type": "text", "positional": true, "ph": "cookies/cookies_social4594.json"}
+          ]
+        },
+        {
+          "id": "profile",
+          "label": "Profile control (ig_profile)",
+          "script": "ig_profile.py",
+          "fields": [
+            {"name": "cookies", "label": "Cookies file", "type": "text", "required": true, "arg": "--cookies", "ph": "cookies/cookies_social4594.json"},
+            {"name": "cmd", "label": "Command", "type": "select", "required": true, "positional": true,
+             "options": ["info", "bio", "name", "dp", "private", "public", "post", "delete"]},
+            {"name": "value", "label": "Text / image path / media_id", "type": "text", "positional": true},
+            {"name": "caption", "label": "Caption (post)", "type": "text", "arg": "--caption"}
+          ]
+        },
+        {
+          "id": "crossplay",
+          "label": "Crossplay",
+          "script": "ig_crossplay.py",
+          "fields": [
+            {"name": "mode", "label": "Mode", "type": "select", "arg": "--mode", "options": ["status", "inventory", "session", "day"]},
+            {"name": "actor", "label": "Actor (optional)", "type": "text", "arg": "--actor"}
+          ]
+        },
+        {
+          "id": "experiment",
+          "label": "Experiment",
+          "script": "ig_experiment.py",
+          "fields": [
+            {"name": "mode", "label": "Mode", "type": "select", "arg": "--mode", "options": ["status", "session", "day"]},
+            {"name": "cookies", "label": "Cookies file (optional)", "type": "text", "arg": "--cookies"}
+          ]
+        },
+        {
+          "id": "proxy_scout",
+          "label": "Proxy scout",
+          "script": "proxy_scout.py",
+          "fields": [
+            {"name": "base", "label": "Proxy base", "type": "text", "required": true, "arg": "--proxy-base"},
+            {"name": "country", "label": "Country", "type": "text", "arg": "--country", "ph": "us"},
+            {"name": "sessions", "label": "Sessions", "type": "text", "arg": "--sessions", "ph": "5"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "matrix",
+      "label": "Multi Matrix Engine",
+      "icon": "🧬",
+      "color": "#19c9a6",
+      "folder": "ig_multi_matrix_engine",
+      "desc": "6-account matrix runner, scorecard, history view",
+      "actions": [
+        {
+          "id": "status",
+          "label": "Scorecard (status)",
+          "script": "matrix_runner.py",
+          "fixed": ["--status"],
+          "fields": []
+        },
+        {
+          "id": "run_all",
+          "label": "Run ALL accounts",
+          "script": "matrix_runner.py",
+          "fixed": ["--all"],
+          "fields": [
+            {"name": "mode", "label": "Mode", "type": "select", "arg": "--mode", "options": ["day", "session"]}
+          ]
+        },
+        {
+          "id": "run_one",
+          "label": "Run single account",
+          "script": "matrix_runner.py",
+          "fields": [
+            {"name": "account", "label": "Account (1-6 ya username)", "type": "text", "required": true, "arg": "--account"},
+            {"name": "mode", "label": "Mode", "type": "select", "arg": "--mode", "options": ["day", "session"]}
+          ]
+        },
+        {
+          "id": "history",
+          "label": "History view",
+          "script": "history_view.py",
+          "fields": [
+            {"name": "target", "label": "Account / file", "type": "text", "required": true, "positional": true, "ph": "social4594"},
+            {"name": "data", "label": "Data usage summary", "type": "flag", "arg": "--data"},
+            {"name": "grep", "label": "Grep text", "type": "text", "arg": "--grep"}
+          ]
+        }
+      ]
+    }
+  ]
+}

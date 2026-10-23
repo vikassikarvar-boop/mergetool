@@ -1,0 +1,28 @@
+{
+  "activity_windows": [["09:30", "12:30"], ["14:30", "17:30"], ["20:30", "23:00"]],
+  "sessions_per_day": [2, 4],
+  "session_minutes": [10, 30],
+  "actions_per_session": {
+    "comment": [2, 8],
+    "like": [4, 14],
+    "seen": [1, 6]
+  },
+  "dwell_seconds": {
+    "like": [4, 25],
+    "comment": [8, 40],
+    "seen": [3, 12]
+  },
+  "gap_base_median": 12.0,
+  "gap_clip": [5, 60],
+  "long_pause_prob": 0.07,
+  "long_pause": [90, 420],
+  "filler_every": [3, 7],
+  "hard_daily_cap": {
+    "comment": 30,
+    "like": 80,
+    "seen": 60
+  },
+  "discovery_mode": true,
+  "escalation_per_day": 1.25,
+  "post_block_cooldown_min": 35
+}

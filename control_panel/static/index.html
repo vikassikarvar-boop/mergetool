@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unified Control Panel — IG Tools Hub</title>
+<meta name="description" content="Teeno tools ko ek hi jagah se control karo: login, post uploader aur multi matrix engine.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0b14;--panel:rgba(255,255,255,.045);--line:rgba(255,255,255,.09);--txt:#e8eaf6;--mute:#8b90ad;--ac:#7c5cff;--ok:#2ee59d;--bad:#ff5c7a;--warn:#ffc857}
+*{box-sizing:border-box;margin:0}
+body{font-family:Outfit,system-ui,sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex;overflow:hidden;
+background-image:radial-gradient(900px 500px at 10% -10%,rgba(124,92,255,.22),transparent),radial-gradient(800px 500px at 100% 110%,rgba(25,201,166,.15),transparent)}
+aside{width:260px;padding:22px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.25);backdrop-filter:blur(14px)}
+.logo{font-weight:700;font-size:20px;letter-spacing:.3px;margin-bottom:14px;display:flex;gap:10px;align-items:center}
+.logo b{background:linear-gradient(135deg,#7c5cff,#19c9a6);-webkit-background-clip:text;color:transparent}
+.nav{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;cursor:pointer;border:1px solid transparent;transition:.2s;color:var(--mute)}
+.nav:hover{background:var(--panel);color:var(--txt);transform:translateX(3px)}
+.nav.on{background:var(--panel);border-color:var(--line);color:var(--txt);box-shadow:inset 3px 0 0 var(--c,var(--ac))}
+.nav .ic{font-size:20px}.nav small{display:block;font-size:11px;opacity:.7}
+.sp{flex:1}
+.badge{margin-left:auto;background:var(--ok);color:#04251a;border-radius:99px;font-size:11px;font-weight:700;padding:2px 8px;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.5}}
+main{flex:1;display:flex;flex-direction:column;min-width:0;padding:22px;gap:16px;overflow:hidden}
+.top h1{font-size:26px;font-weight:700}.top p{color:var(--mute);margin-top:4px;font-size:14px}
+.grid{flex:1;display:grid;grid-template-columns:minmax(320px,430px) 1fr;gap:16px;min-height:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;backdrop-filter:blur(12px);display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tab{padding:7px 12px;border-radius:99px;font-size:13px;cursor:pointer;border:1px solid var(--line);color:var(--mute);transition:.2s}
+.tab:hover{color:var(--txt)}.tab.on{background:var(--c,var(--ac));color:#fff;border-color:transparent}
+.form{overflow:auto;display:flex;flex-direction:column;gap:12px;padding-right:4px}
+label{font-size:12px;color:var(--mute);display:block;margin-bottom:5px}
+input[type=text],input[type=password],select{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;outline:none;transition:.2s}
+input:focus,select:focus{border-color:var(--c,var(--ac));box-shadow:0 0 0 3px rgba(124,92,255,.18)}
+select option{background:#14162a}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 12px;border-radius:99px;border:1px solid var(--line);cursor:pointer;font-size:13px;color:var(--mute);user-select:none;transition:.15s}
+.chip.on{background:var(--c,var(--ac));color:#fff;border-color:transparent}
+.help{font-size:11px;color:var(--mute);margin-top:4px;line-height:1.4}
+.desc{font-size:13px;color:var(--mute);margin-bottom:12px}
+.btn{border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:600;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--c,var(--ac)),#19c9a6);transition:.2s;margin-top:6px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(124,92,255,.35)}
+.btn.sm{padding:6px 12px;font-size:12px;margin:0;background:var(--panel);border:1px solid var(--line)}
+.btn.sm.red{color:var(--bad)}
+.head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.head h3{font-size:15px;font-weight:600}
+.st{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--line)}
+.st.RUNNING{background:rgba(124,92,255,.3);color:#cfc4ff;animation:pulse 1.4s infinite}
+.st.DONE,.st.SUCCESS{background:rgba(46,229,157,.18);color:var(--ok)}
+.st.FAILED,.st.STOPPED,.st.INTERRUPTED{background:rgba(255,92,122,.18);color:var(--bad)}
+.st.THROTTLED,.st.CHALLENGE,.st.GENERIC_ERROR,.st.FALLBACK,.st.RECOVERY{background:rgba(255,200,87,.18);color:var(--warn)}
+.st:not(.RUNNING):not(.DONE):not(.SUCCESS):not(.FAILED):not(.STOPPED):not(.INTERRUPTED):not(.THROTTLED){}
+pre{flex:1;overflow:auto;background:rgba(0,0,0,.45);border:1px solid var(--line);border-radius:12px;padding:14px;font:12.5px/1.55 'JetBrains Mono',monospace;white-space:pre-wrap;word-break:break-word;color:#cfd3ee}
+.cmd{font:11px 'JetBrains Mono',monospace;color:var(--mute);margin-bottom:8px;word-break:break-all}
+.right{display:flex;flex-direction:column;gap:16px;min-height:0}
+.running{display:flex;gap:8px;flex-wrap:wrap}
+.jobs{overflow:auto;display:flex;flex-direction:column;gap:6px}
+.job{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;font-size:13px;transition:.15s}
+.job:hover,.job.on{background:var(--panel);border-color:var(--c,var(--ac))}
+.job .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.job .tm{color:var(--mute);font-size:11px}
+.empty{color:var(--mute);text-align:center;padding:30px;font-size:14px}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+@media(max-width:1000px){.grid{grid-template-columns:1fr;overflow:auto}aside{width:80px}.nav div,.logo span{display:none}}
+.grid.wide{grid-template-columns:minmax(560px,1.5fr) minmax(340px,1fr)}
+.st.ALIVE{background:rgba(46,229,157,.18);color:var(--ok)}
+.st.SUSPENDED{background:rgba(255,92,122,.25);color:#ff5c7a;font-weight:700}
+.st.EXPIRED{background:rgba(255,200,87,.25);color:#ffc857;font-weight:700}
+.st.CHALLENGE{background:rgba(186,104,200,.25);color:#cf88ff;font-weight:700}
+.st.PROXY_ERROR{background:rgba(255,107,107,.25);color:#ff6b6b}
+.st.UNCHECKED{background:rgba(255,255,255,.07);color:var(--mute)}
+.st.BAD_FILE,.st.NO_SESSION{background:rgba(255,92,122,.18);color:var(--bad)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:12px}
+.stat-box{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;padding:10px 14px;text-align:center}
+.stat-box .num{font-size:22px;font-weight:700;margin-bottom:2px}
+.stat-box .lbl{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.5px}
+.h-table{width:100%;border-collapse:collapse;font-size:13px}
+.h-table th,.h-table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+.h-table th{color:var(--mute);font-weight:500;font-size:12px}
+.h-table tr:hover{background:rgba(255,255,255,.02)}
+.prog-bar-wrap{background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:8px;height:12px;overflow:hidden;margin:8px 0}
+.prog-bar-fill{background:linear-gradient(90deg,#00b4d8,#2ee59d);height:100%;transition:.3s width}
+.camp{overflow:auto;display:flex;flex-direction:column;gap:12px;padding-right:4px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar input[type=text]{flex:1;min-width:160px}
+.acc{border:1px solid var(--line);border-radius:14px;padding:12px;background:rgba(0,0,0,.18);transition:.2s}
+.acc.sel{border-color:var(--ac);box-shadow:0 0 0 1px rgba(124,92,255,.35) inset}
+.acc .hd{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.acc .hd b{font-size:15px}.acc .hd small{color:var(--mute)}
+.acc .row{display:grid;grid-template-columns:1fr 90px;gap:8px;margin-bottom:8px}
+.zones{display:grid;grid-template-columns:110px 1fr;gap:8px}
+.zone{border:1.5px dashed var(--line);border-radius:12px;padding:8px;font-size:11px;color:var(--mute);text-align:center;cursor:pointer;transition:.2s;min-height:74px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.zone:hover,.zone.over{border-color:var(--ac);background:rgba(124,92,255,.1);color:var(--txt)}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px}
+.th{position:relative;flex:0 0 62px;height:62px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
+.th img{width:100%;height:100%;object-fit:cover}.th.used{opacity:.35}
+.th .x,.th .s{position:absolute;top:2px;font-size:10px;background:rgba(0,0,0,.7);border-radius:6px;padding:1px 4px;cursor:pointer;display:none}
+.th .x{right:2px}.th .s{left:2px}.th:hover .x,.th:hover .s{display:block}
+.th .u{position:absolute;bottom:2px;left:2px;font-size:10px;background:var(--ok);color:#04251a;border-radius:6px;padding:0 4px;font-weight:700}
+.th.dp{border-color:var(--warn)}
+.sum{background:linear-gradient(135deg,rgba(124,92,255,.18),rgba(25,201,166,.12));border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px}
+.opts{display:flex;flex-wrap:wrap;gap:14px}
+textarea{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px;font:inherit;font-size:13px;min-height:64px;outline:none}
+.mini{width:70px!important}
+table.pg{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px}
+table.pg td,table.pg th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
+table.pg th{color:var(--mute);font-weight:500}
+.ok{color:var(--ok)}.fl{color:var(--bad)}
+#toast{position:fixed;right:20px;bottom:20px;max-width:420px;background:#171a30;border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:13px;display:none;z-index:9;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<aside id="side"></aside>
+<div id="toast"></div>
+<main>
+  <header class="top"><h1 id="title">Control Panel</h1><p id="sub"></p></header>
+  <div class="grid" id="grid">
+    <section class="card" id="formCard"></section>
+    <div class="right">
+      <section class="card" style="flex:2" id="outCard"></section>
+      <section class="card" style="flex:1" id="histCard"></section>
+    </div>
+  </div>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+let TOOLS=[],JOBS=[],view='hist-all',curTool=null,curAct=null,curJob=null,seen=0,vals={};
+let HEALTH_CACHE={},HEALTH_ACCS=[],HEALTH_PROG={},healthFilter='all',healthSearch='';
+
+const api=(u,o)=>fetch(u,o).then(r=>r.json());
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const fmt=t=>t?new Date(t*1000).toLocaleTimeString():'';
+const dur=j=>{const s=Math.round(((j.ended||Date.now()/1000)-j.started));return s<60?s+'s':Math.floor(s/60)+'m'+(s%60)+'s'};
+const colorOf=id=>(TOOLS.find(t=>t.id===id)||{}).color||'#7c5cff';
+
+function healthIssuesCount(){
+  let c=0;for(const k in HEALTH_CACHE){const s=HEALTH_CACHE[k]?.status;if(s==='SUSPENDED'||s==='EXPIRED'||s==='CHALLENGE'||s==='PROXY_ERROR')c++}
+  return c;
+}
+function hBadge(name){
+  const h=HEALTH_CACHE[name];
+  if(!h)return `<span class="st UNCHECKED" title="Abhi check nahi kiya">UNCHECKED</span>`;
+  const s=h.status;
+  const ic=s==='ALIVE'?'🟢 ':s==='SUSPENDED'?'🔴 ':s==='EXPIRED'?'🟡 ':s==='CHALLENGE'?'🟠 ':'⚠️ ';
+  const lbl=s==='ALIVE'?'ALIVE':s==='SUSPENDED'?'SUSPENDED':s==='EXPIRED'?'EXPIRED':s==='CHALLENGE'?'CHALLENGE':s;
+  return `<span class="st ${s}" title="${esc(h.detail||s)}">${ic}${lbl}</span>`;
+}
+async function loadHealthCache(){
+  const r=await api('/api/health');
+  if(!r.error){HEALTH_CACHE=r.cache||{};HEALTH_ACCS=r.accounts||[];HEALTH_PROG=r.progress||{}}
+}
+
+async function init(){
+  TOOLS=await api('/api/tools');
+  await loadHealthCache();
+  if(!curTool&&TOOLS.length){pick('__health')}
+  renderSide();poll();setInterval(poll,1000);
+}
+
+function pick(id){
+  curTool=id;
+  if(id==='__camp'){curAct=null;renderAll();loadCamp();return}
+  if(id==='__cm'){curAct=null;renderAll();loadRoster();return}
+  if(id==='__health'){curAct=null;renderAll();loadHealth();return}
+  const t=TOOLS.find(x=>x.id===id);curAct=t.actions[0]?.id;vals={};renderAll()
+}
+function renderSide(){
+  const run=JOBS.filter(j=>j.status==='RUNNING');
+  const iss=healthIssuesCount();
+  $('#side').innerHTML=`<div class="logo">⚡<span><b>IG Hub</b></span></div>`+
+   `<div class="nav ${curTool==='__health'?'on':''}" style="--c:#00b4d8" onclick="pick('__health')"><span class="ic">🛡️</span><div>Account Health<small>check suspended/expired</small></div>${iss?`<span class="badge" style="background:var(--bad);color:#fff">${iss}</span>`:''}</div>`+
+   `<div class="nav ${curTool==='__cm'?'on':''}" style="--c:#2ec4b6" onclick="pick('__cm')"><span class="ic">💬</span><div>Comment Blast<small>1 post, N comments</small></div>${run.filter(j=>j.tool==='comments').length?`<span class="badge">${run.filter(j=>j.tool==='comments').length}</span>`:''}</div>`+
+   `<div class="nav ${curTool==='__camp'?'on':''}" style="--c:#ffb703" onclick="pick('__camp')"><span class="ic">🚀</span><div>Bulk Campaign<small>multi-account, 1 click</small></div>${run.filter(j=>j.tool==='campaign').length?`<span class="badge">${run.filter(j=>j.tool==='campaign').length}</span>`:''}</div>`+
+   TOOLS.map(t=>{const n=run.filter(j=>j.tool===t.id).length;return `<div class="nav ${curTool===t.id?'on':''}" style="--c:${t.color}" onclick="pick('${t.id}')"><span class="ic">${t.icon||'🔧'}</span><div>${esc(t.label)}<small>${t.actions.length} actions${t.exists?'':' • folder missing'}</small></div>${n?`<span class="badge">${n}</span>`:''}</div>`}).join('')+
+   `<div class="sp"></div><div class="help">Total running: ${run.length} • Tools alag-alag chalte hain, ek doosre ko touch nahi karte.</div>`;
+}
+function renderAll(){renderSide();renderForm();renderOut();renderHist()}
+
+function renderForm(){
+  $('#grid').classList.toggle('wide',curTool==='__camp'||curTool==='__cm'||curTool==='__health');
+  if(curTool==='__camp'){renderCamp();return}
+  if(curTool==='__cm'){renderComm();return}
+  if(curTool==='__health'){renderHealth();return}
+  const t=TOOLS.find(x=>x.id===curTool);if(!t)return;
+  const a=t.actions.find(x=>x.id===curAct);
+  $('#title').textContent=t.icon+' '+t.label;$('#sub').textContent=t.desc||'';
+  const c=$('#formCard');c.style.setProperty('--c',t.color);
+  let h=`<div class="tabs">`+t.actions.map(x=>`<div class="tab ${x.id===curAct?'on':''}" style="--c:${t.color}" onclick="curAct='${x.id}';renderForm()">${esc(x.label)}</div>`).join('')+`</div>`;
+  if(!a){c.innerHTML=h+'<div class="empty">Is tool me koi action nahi</div>';return}
+  h+=`<div class="desc">${esc(a.desc||'')}${a.exists?'':' <b style="color:var(--bad)">⚠ script nahi mili: '+esc(a.script)+'</b>'}</div><div class="form">`;
+  for(const f of a.fields){
+    const k=a.id+'.'+f.name,v=vals[k];const req=f.required?' *':'';
+    if(f.type==='flag')h+=`<label class="chk"><input type="checkbox" ${v?'checked':''} onchange="vals['${k}']=this.checked"> ${esc(f.label)}</label>`+(f.help?`<div class="help">${esc(f.help)}</div>`:'');
+    else if(f.type==='multi')h+=`<div><label>${esc(f.label)}${req}</label><div class="chips">${f.options.map(o=>`<span class="chip ${(v||[]).includes(o)?'on':''}" style="--c:${t.color}" onclick="tog('${k}','${o}')">${o}</span>`).join('')}</div></div>`;
+    else if(f.type==='select')h+=`<div><label>${esc(f.label)}${req}</label><select onchange="vals['${k}']=this.value">${f.options.map(o=>`<option ${v===o?'selected':''}>${o}</option>`).join('')}</select>${f.help?`<div class="help">${esc(f.help)}</div>`:''}</div>`;
+    else h+=`<div><label>${esc(f.label)}${req}</label><input type="${f.type==='password'?'password':'text'}" placeholder="${esc(f.ph||'')}" value="${esc(v||'')}" oninput="vals['${k}']=this.value" autocomplete="off">${f.help?`<div class="help">${esc(f.help)}</div>`:''}</div>`;
+  }
+  h+=`<button class="btn" id="runBtn" style="--c:${t.color}" onclick="run()">▶ Run</button></div>`;
+  c.innerHTML=h;
+}
+function tog(k,o){const a=vals[k]||[];vals[k]=a.includes(o)?a.filter(x=>x!==o):[...a,o];renderForm()}
+
+async function run(){
+  const t=TOOLS.find(x=>x.id===curTool),a=t.actions.find(x=>x.id===curAct),v={};
+  for(const f of a.fields){const x=vals[a.id+'.'+f.name];
+    if(f.type==='select'&&x===undefined)v[f.name]=f.options[0];else v[f.name]=x}
+  const r=await api('/api/run',{method:'POST',body:JSON.stringify({tool:curTool,action:curAct,values:v})});
+  if(r.error){alert(r.error);return}
+  curJob=r.id;seen=0;JOBS=await api('/api/jobs');renderAll();await poll();
+}
+
+async function poll(){
+  JOBS=await api('/api/jobs');
+  if(HEALTH_PROG.checking || curTool==='__health'){
+    await loadHealthCache();
+    if(curTool==='__health')renderHealth();
+  }
+  if(curJob){const j=await api('/api/jobs/'+curJob+'?since='+seen);if(!j.error){
+    const pre=$('#log');
+    if(pre&&j.lines){const near=pre.scrollHeight-pre.scrollTop-pre.clientHeight<60;pre.textContent+=j.lines.join('\n')+(j.lines.length?'\n':'');if(near)pre.scrollTop=pre.scrollHeight}
+    seen=j.total;const s=$('#curst');if(s){s.textContent=j.status;s.className='st '+j.status}
+    renderProg(j);
+    if(lastSt==='RUNNING'&&j.status!=='RUNNING'&&curTool==='__camp'&&j.tool==='campaign')loadCamp();
+    lastSt=j.status;
+    const bt=$('#stopBtn');if(bt)bt.style.display=j.status==='RUNNING'?'':'none';
+    const du=$('#curdur');if(du)du.textContent=dur(j)}}
+  renderSide();renderHist();
+}
+
+function openJob(id){curJob=id;seen=0;renderOut();poll()}
+function renderOut(){
+  const c=$('#outCard');const j=JOBS.find(x=>x.id===curJob);
+  if(!j){c.innerHTML='<div class="empty">▶ Koi action Run karo — live output yahan dikhega</div>';return}
+  c.style.setProperty('--c',colorOf(j.tool));
+  c.innerHTML=`<div class="head"><h3>${esc(j.tool_label)} › ${esc(j.action_label)}</h3><span id="curst" class="st ${j.status}">${j.status}</span><span class="job tm" id="curdur" style="border:0;padding:0"></span><span style="flex:1"></span><button class="btn sm red" id="stopBtn" onclick="stop()" style="${j.status==='RUNNING'?'':'display:none'}">■ Stop</button></div><div id="prog"></div><div class="cmd">$ ${esc(j.cmd)}</div><pre id="log"></pre>`;
+  renderProg(j);
+}
+function renderProg(j){
+  const el=$('#prog');if(!el||!j.progress)return;
+  if(Array.isArray(j.progress)){
+    el.innerHTML='<table class="pg"><tr><th>#</th><th>Account</th><th>Comment</th><th>Status</th></tr>'+j.progress.map(r=>`<tr><td>${r.n}</td><td>${esc(r.account)}</td><td>${esc(r.text)}</td><td><span class="st ${r.status==='OK'?'DONE':r.status==='FAIL'?'FAILED':r.status}">${r.status}</span></td></tr>`).join('')+'</table>';return}
+  const m=v=>v==='OK'?'<span class=ok>✔</span>':v==='FAIL'?'<span class=fl>✖</span>':v;
+  el.innerHTML='<table class="pg"><tr><th>Account</th><th>DP</th><th>Bio</th><th>Posts</th><th>Private</th><th>Status</th></tr>'+Object.entries(j.progress).map(([n,p])=>`<tr><td>${esc(n)}</td><td>${m(p.dp)}</td><td>${m(p.bio)}</td><td>${p.posts_done}/${p.posts_total}${p.posts_failed?` <span class=fl>(${p.posts_failed} fail)</span>`:''}</td><td>${m(p.private)}</td><td><span class="st ${p.status}">${p.status}</span>${p.note?` <small>${esc(p.note)}</small>`:''}</td></tr>`).join('')+'</table>';
+}
+async function stop(){await api('/api/jobs/'+curJob+'/stop',{method:'POST',body:'{}'})}
+async function clearJobs(){await api('/api/jobs/clear',{method:'POST',body:'{}'});if(!JOBS.find(j=>j.id===curJob&&j.status==='RUNNING')){curJob=null;renderOut()}poll()}
+
+function renderHist(){
+  const c=$('#histCard');
+  c.innerHTML=`<div class="head"><h3>History (${JOBS.length})</h3><span style="flex:1"></span><button class="btn sm" onclick="clearJobs()">Clear finished</button></div><div class="jobs">`+
+   (JOBS.length?JOBS.slice(0,60).map(j=>`<div class="job ${j.id===curJob?'on':''}" style="--c:${colorOf(j.tool)}" onclick="openJob('${j.id}')"><span class="st ${j.status}">${j.status}</span><span class="t">${esc(j.tool_label)} › ${esc(j.action_label)}</span><span class="tm">${fmt(j.started)} • ${dur(j)}</span></div>`).join(''):'<div class="empty">Abhi koi run nahi hua</div>')+`</div>`;
+}
+init();
+
+/* ================= BULK CAMPAIGN ================= */
+let lastSt=null;
+const LS=JSON.parse(localStorage.getItem('camp')||'{}');
+const camp={accs:[],sel:LS.sel||{},bio:LS.bio||{},posts:LS.posts||{},gposts:LS.gposts||'all',captions:LS.captions||'',
+  opt:LS.opt||{dp:true,bio:true,post:true,priv:false},pace:LS.pace||{parallel:1,fast:false,dry:false,gmin:120,gmax:300}};
+const saveCamp=()=>localStorage.setItem('camp',JSON.stringify({sel:camp.sel,bio:camp.bio,posts:camp.posts,gposts:camp.gposts,captions:camp.captions,opt:camp.opt,pace:camp.pace}));
+function toast(m,ms=5000){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',ms)}
+const img=(a,k,n)=>`/api/camp/img?acc=${encodeURIComponent(a)}&kind=${k}&name=${encodeURIComponent(n)}`;
+
+async function loadCamp(){const r=await api('/api/camp/accounts');if(r.error){$('#formCard').innerHTML='<div class="empty">'+esc(r.error)+'</div>';return}
+  camp.accs=r;renderCamp()}
+
+function plan(){
+  let n=0,dp=0,bio=0,po=0,pv=0;
+  for(const a of camp.accs){if(!camp.sel[a.name])continue;n++;
+    const free=a.posts.length-a.used_posts.length;
+    if(camp.opt.dp&&a.dp.length)dp++;
+    if(camp.opt.bio)bio++;
+    if(camp.opt.post)po+=wantPosts(a);
+    if(camp.opt.priv)pv++}
+  return{n,dp,bio,po,pv}
+}
+function wantPosts(a){const free=a.posts.length-a.used_posts.length;const v=String(camp.posts[a.name]||camp.gposts||'all').trim();
+  return v==='all'?free:Math.min(free,Math.max(0,parseInt(v)||0))}
+function updSum(){const p=plan();const e=$('#sum');if(e)e.innerHTML=`<b>${p.n}</b> accounts • DP: <b>${p.dp}</b> • Bio: <b>${p.bio}</b> • Posts: <b>${p.po}</b> • Private: <b>${p.pv}</b>`}
+
+function renderCamp(){
+  const t=$('#title'),s=$('#sub');t.textContent='🚀 Bulk Campaign';s.textContent='Har account ki apni images • ek click me DP + Bio + Posts + Private • koi image kabhi repeat nahi';
+  const c=$('#formCard');c.style.setProperty('--c','#ffb703');
+  const o=camp.opt,pc=camp.pace;
+  let h=`<div class="camp">
+  <div class="bar"><button class="btn sm" onclick="selAll(true)">Select all</button><button class="btn sm" onclick="selAll(false)">None</button>
+   <button class="btn sm" onclick="selAliveOnly()">Select only Valid (Alive)</button>
+   <button class="btn sm" onclick="genBios()">🎲 Bio generate (selected)</button>
+   <button class="btn sm" onclick="pick('__health')">🛡️ Check Health</button>
+   <label class="btn sm" style="cursor:pointer">📁 Folder choose (sub-folder = account)<input type="file" webkitdirectory multiple hidden onchange="pickFolder(this.files)"></label>
+   <input type="text" id="impPath" placeholder="ya server path: D:\\photos (andar har account ka folder)"><button class="btn sm" onclick="importPath()">Import</button></div>`;
+  if(!camp.accs.length)h+='<div class="empty">Koi account nahi mila — Post uploader/cookies me cookies_&lt;name&gt;.json chahiye</div>';
+  for(const a of camp.accs){
+    const sel=!!camp.sel[a.name],free=a.posts.length-a.used_posts.length,q=encodeURIComponent(a.name);
+    h+=`<div class="acc ${sel?'sel':''}"><div class="hd"><input type="checkbox" ${sel?'checked':''} onchange="camp.sel['${a.name}']=this.checked;saveCamp();this.closest('.acc').classList.toggle('sel',this.checked);updSum()"><b>@${esc(a.name)}</b> ${hBadge(a.name)}<small>DP ${a.dp.length} • Posts ${a.posts.length} (free ${free})</small><span style="flex:1"></span>${a.used_posts.length?`<button class="btn sm" onclick="resetUsed('${a.name}')">↺ used reset</button>`:''}<button class="btn sm red" style="padding:2px 8px;font-size:11px" onclick="removeAcc('${a.name}',true)" title="Account ko hatayein">🗑️</button></div>
+     <div class="row"><input type="text" placeholder="Bio — khali = auto unique female bio 🎲" value="${esc(camp.bio[a.name]||'')}" oninput="camp.bio['${a.name}']=this.value;saveCamp();updSum()"><input type="text" title="kitni posts (khali = global)" placeholder="${esc(camp.gposts)}" value="${esc(camp.posts[a.name]||'')}" oninput="camp.posts[this.name||'${a.name}']=this.value;saveCamp();updSum()"></div>
+     <div class="zones"><div class="zone" ondragover="zo(event)" ondragleave="zl(event)" ondrop="zd(event,'${a.name}','dp')" onclick="zc('${a.name}','dp')">🖼 DP<br>drop / click</div>
+      <div class="zone" ondragover="zo(event)" ondragleave="zl(event)" ondrop="zd(event,'${a.name}','post')" onclick="zc('${a.name}','post')">📸 Posts — is person ki sab images drop / click</div></div>
+     <div class="strip">`+
+      a.dp.map(n=>`<div class="th dp" title="DP: ${esc(n)}"><img loading="lazy" src="${img(a.name,'dp',n)}"><span class="x" onclick="delImg('${a.name}','dp','${esc(n)}')">✕</span><span class="s" onclick="mvImg('${a.name}','dp','post','${esc(n)}')">→post</span></div>`).join('')+
+      a.posts.map(n=>{const u=a.used_posts.includes(n);return `<div class="th ${u?'used':''}" title="${esc(n)}"><img loading="lazy" src="${img(a.name,'post',n)}">${u?'<span class="u">✓</span>':''}<span class="x" onclick="delImg('${a.name}','post','${esc(n)}')">✕</span><span class="s" onclick="mvImg('${a.name}','post','dp','${esc(n)}')">→DP</span></div>`}).join('')+`</div></div>`;
+  }
+  h+=`<div class="card" style="gap:10px"><div class="opts">
+    <label class="chk"><input type="checkbox" ${o.dp?'checked':''} onchange="camp.opt.dp=this.checked;saveCamp();updSum()">DP set</label>
+    <label class="chk"><input type="checkbox" ${o.bio?'checked':''} onchange="camp.opt.bio=this.checked;saveCamp();updSum()">Bio set</label>
+    <label class="chk"><input type="checkbox" ${o.post?'checked':''} onchange="camp.opt.post=this.checked;saveCamp();updSum()">Posts</label>
+    <label class="chk"><input type="checkbox" ${o.priv?'checked':''} onchange="camp.opt.priv=this.checked;saveCamp();updSum()">Account Private</label></div>
+   <div class="bar"><label style="margin:0">Posts/account (global)</label><input type="text" class="mini" value="${esc(camp.gposts)}" oninput="camp.gposts=this.value||'all';saveCamp();updSum()"><label style="margin:0">Parallel accounts</label><input type="text" class="mini" value="${pc.parallel}" oninput="camp.pace.parallel=+this.value||1;saveCamp()"><label style="margin:0">Post gap (sec)</label><input type="text" class="mini" value="${pc.gmin}" oninput="camp.pace.gmin=+this.value||120;saveCamp()">–<input type="text" class="mini" value="${pc.gmax}" oninput="camp.pace.gmax=+this.value||300;saveCamp()"></div>
+   <div><label>Captions (ek line = ek caption, accounts me bata ke use hongi; khali = bina caption)</label><textarea oninput="camp.captions=this.value;saveCamp()">${esc(camp.captions)}</textarea></div>
+   <div class="opts"><label class="chk"><input type="checkbox" ${pc.dry?'checked':''} onchange="camp.pace.dry=this.checked;saveCamp()">Dry-run (sirf plan dikhao, kuch upload nahi)</label>
+    <label class="chk"><input type="checkbox" ${pc.fast?'checked':''} onchange="camp.pace.fast=this.checked;saveCamp()">Fast gaps (sirf test — real me OFF rakho)</label></div>
+   <div class="sum" id="sum"></div><button class="btn" style="--c:#ffb703" onclick="startCamp()">🚀 Start Campaign</button></div></div>`;
+  c.innerHTML=h;updSum();
+}
+function selAll(v){for(const a of camp.accs)camp.sel[a.name]=v;saveCamp();renderCamp()}
+function selAliveOnly(){for(const a of camp.accs){const h=HEALTH_CACHE[a.name];camp.sel[a.name]=(h&&h.status==='ALIVE')}saveCamp();renderCamp();toast('Sirf ALIVE accounts select kiye')}
+function zo(e){e.preventDefault();e.currentTarget.classList.add('over')}
+function zl(e){e.currentTarget.classList.remove('over')}
+function zd(e,a,k){e.preventDefault();e.currentTarget.classList.remove('over');upFiles(a,k,[...e.dataTransfer.files])}
+function zc(a,k){const i=document.createElement('input');i.type='file';i.accept='image/*';i.multiple=k==='post';i.onchange=()=>upFiles(a,k,[...i.files]);i.click()}
+
+async function upFiles(acc,kind,files,quiet){
+  files=files.filter(f=>/\.(jpe?g|png|webp|bmp)$/i.test(f.name));let ok=0,bad=[];
+  for(const f of files){const r=await fetch(`/api/camp/upload?acc=${encodeURIComponent(acc)}&kind=${kind}&name=${encodeURIComponent(f.name)}`,{method:'POST',body:f}).then(r=>r.json());
+    if(r.ok)ok++;else bad.push(f.name+': '+r.msg)}
+  if(!quiet){toast(`@${acc}: ${ok} add hui`+(bad.length?`\n${bad.length} skip:\n`+bad.slice(0,5).join('\n'):''));await loadCamp()}
+  return{ok,bad}
+}
+function matchAcc(folder){const f=folder.toLowerCase();let m=camp.accs.find(a=>a.name.toLowerCase()===f)||camp.accs.find(a=>f.includes(a.name.toLowerCase())||a.name.toLowerCase().includes(f));return m&&m.name}
+async function pickFolder(list){
+  const g={};for(const f of list){const p=(f.webkitRelativePath||'').split('/');if(p.length<3||!/\.(jpe?g|png|webp|bmp)$/i.test(f.name))continue;
+    const sub=p[1];(g[sub]=g[sub]||[]).push({f,sec:p.length>3?p[2].toLowerCase():''})}
+  let msg=[];
+  for(const [sub,items] of Object.entries(g)){const acc=matchAcc(sub);if(!acc){msg.push(`✖ '${sub}' — matching account nahi`);continue}
+    let dp=items.filter(i=>i.sec==='dp').map(i=>i.f),po=items.filter(i=>i.sec==='post').map(i=>i.f);
+    if(!dp.length&&!po.length){const all=items.map(i=>i.f).sort((a,b)=>a.name.localeCompare(b.name));dp=all.slice(0,1);po=all.slice(1)}
+    const a=await upFiles(acc,'dp',dp,true),b=await upFiles(acc,'post',po,true);
+    msg.push(`✔ @${acc}: ${a.ok} DP, ${b.ok} posts`+(a.bad.length+b.bad.length?` (${a.bad.length+b.bad.length} duplicate/skip)`:''))}
+  toast(msg.join('\n')||'Koi image nahi mili (structure: folder/<account>/images)',9000);await loadCamp()
+}
+async function importPath(){const p=$('#impPath').value;if(!p)return;const r=await api('/api/camp/import',{method:'POST',body:JSON.stringify({path:p})});
+  if(r.error){toast(r.error);return}toast(r.report.map(x=>x.account?`✔ @${x.account}: ${x.added} add, ${x.skipped} skip`:`✖ '${x.folder}' — ${x.msg}`).join('\n')||'khali folder',9000);loadCamp()}
+async function delImg(acc,kind,name){await api('/api/camp/delete',{method:'POST',body:JSON.stringify({acc,kind,name})});loadCamp()}
+async function mvImg(acc,from,to,name){await api('/api/camp/move',{method:'POST',body:JSON.stringify({acc,from,to,name})});loadCamp()}
+async function resetUsed(acc){if(!confirm('Is account ki used-list reset karein? (images dobara post ho sakti hain)'))return;await api('/api/camp/reset',{method:'POST',body:JSON.stringify({acc})});loadCamp()}
+
+async function genBios(){const names=camp.accs.filter(a=>camp.sel[a.name]).map(a=>a.name);if(!names.length){toast('Pehle accounts select karo');return}
+  const r=await api('/api/bio/generate',{method:'POST',body:JSON.stringify({accounts:names})});if(r.error){toast(r.error);return}
+  Object.assign(camp.bio,r.bios);saveCamp();renderCamp();toast('Unique bios ban gayi — edit bhi kar sakte ho')}
+
+/* ================= COMMENT BLAST ================= */
+const CL=JSON.parse(localStorage.getItem('cm')||'{}');
+const cm={url:CL.url||'',text:CL.text||'',shuffle:!!CL.shuffle,dry:false,fast:false,gmin:CL.gmin||60,gmax:CL.gmax||180,roster:[],avail:[]};
+const saveCm=()=>localStorage.setItem('cm',JSON.stringify({url:cm.url,text:cm.text,shuffle:cm.shuffle,gmin:cm.gmin,gmax:cm.gmax}));
+async function loadRoster(){const r=await api('/api/roster');cm.roster=r.roster;cm.avail=r.available;renderComm()}
+function cmLines(){const s=new Set();return cm.text.split('\n').map(x=>x.trim()).filter(x=>x&&!s.has(x.toLowerCase())&&s.add(x.toLowerCase()))}
+function updCm(){const e=$('#cmSum');if(!e)return;const n=cmLines().length,m=cm.roster.filter(r=>r.active&&r.exists).length;
+  e.innerHTML=`<b>${n}</b> unique comments • <b>${m}</b> active accounts`+(m&&n?` • har account ≈ <b>${Math.ceil(n/m)}</b> comment (round-robin)`:'')+(n&&m&&n<m?` • sirf pehle ${n} accounts use honge`:'')}
+function renderComm(){
+  $('#title').textContent='💬 Comment Blast';$('#sub').textContent='Ek post par ek saath kai comments — active accounts baari-baari se, har account ek comment';
+  const c=$('#formCard');c.style.setProperty('--c','#2ec4b6');
+  let h=`<div class="camp"><div class="card" style="gap:10px">
+   <div><label>Post URL</label><input type="text" placeholder="https://www.instagram.com/p/XXXXXXXX/" value="${esc(cm.url)}" oninput="cm.url=this.value;saveCm()"></div>
+   <div><label>Comments — ek line = ek comment (duplicate lines auto hat jaati hain)</label><textarea style="min-height:170px" oninput="cm.text=this.value;saveCm();updCm()">${esc(cm.text)}</textarea></div>
+   <div class="bar"><label style="margin:0">Gap (sec)</label><input type="text" class="mini" value="${cm.gmin}" oninput="cm.gmin=+this.value||60;saveCm()">–<input type="text" class="mini" value="${cm.gmax}" oninput="cm.gmax=+this.value||180;saveCm()">
+    <label class="chk"><input type="checkbox" ${cm.shuffle?'checked':''} onchange="cm.shuffle=this.checked;saveCm()">Accounts shuffle</label>
+    <label class="chk"><input type="checkbox" onchange="cm.dry=this.checked">Dry-run</label>
+    <label class="chk"><input type="checkbox" onchange="cm.fast=this.checked">Fast (sirf test)</label></div>
+   <div class="sum" id="cmSum"></div><button class="btn" style="--c:#2ec4b6" onclick="startCm()">💬 Start Comments</button></div>
+   <div class="card" style="gap:8px"><div class="head"><h3>Active accounts (${cm.roster.filter(r=>r.active).length}/${cm.roster.length})</h3><span style="flex:1"></span><button class="btn sm" onclick="pick('__health')">🛡️ View Health</button></div>`+
+   (cm.roster.length?cm.roster.map(r=>`<div class="job" style="cursor:default"><label class="chk" style="margin:0"><input type="checkbox" ${r.active?'checked':''} onchange="rosterSet('${r.name}',{active:this.checked})"></label><span class="t"><b>@${esc(r.name)}</b> ${hBadge(r.name)} <small style="color:var(--mute)">${esc(r.source)}${r.exists?'':' • cookie file missing'}</small></span><button class="btn sm red" onclick="rosterSet('${r.name}',{remove:true})">✕ remove</button></div>`).join(''):'<div class="empty">Roster khali — neeche se account add karo</div>')+
+   `<div class="bar"><select id="addSel" style="flex:1">${cm.avail.map(a=>`<option value="${esc(a.name)}">${esc(a.name)} (${a.source})</option>`).join('')||'<option value="">(koi naya cookie file nahi mila)</option>'}</select>
+    <button class="btn sm" onclick="rosterAdd()">+ Add</button>
+    <label class="btn sm" style="cursor:pointer">⬆ Cookie file upload<input type="file" accept=".json" multiple hidden onchange="rosterUpload(this.files)"></label></div>
+   <div class="help">Add = roster me jodo • checkbox = is run me active/inactive • remove = roster se hatao (cookie file delete nahi hoti)</div></div></div>`;
+  c.innerHTML=h;updCm();
+}
+async function rosterSet(name,o){await api('/api/roster/set',{method:'POST',body:JSON.stringify({name,...o})});loadRoster()}
+async function rosterAdd(){const n=$('#addSel').value;if(!n)return;await api('/api/roster/add',{method:'POST',body:JSON.stringify({name:n})});loadRoster()}
+async function rosterUpload(files){let m=[];for(const f of files){const r=await fetch('/api/roster/upload',{method:'POST',body:f}).then(r=>r.json());
+    if(r.name){await api('/api/roster/add',{method:'POST',body:JSON.stringify({name:r.name})});m.push('✔ '+r.name)}else m.push('✖ '+f.name+': '+r.error)}
+  toast(m.join('\n'));loadRoster()}
+async function startCm(){const n=cmLines().length;if(!cm.url.trim()){toast('Post URL do');return}if(!n){toast('Comments likho');return}
+  if(!cm.dry&&!confirm(`${n} comments, ${cm.roster.filter(r=>r.active).length} active accounts se post hongi. Start?`))return;
+  const r=await api('/api/comments/start',{method:'POST',body:JSON.stringify({url:cm.url,comments:cm.text,shuffle:cm.shuffle,dry:cm.dry,fast:cm.fast,gap_min:cm.gmin,gap_max:cm.gmax})});
+  if(r.error){toast(r.error);return}curJob=r.id;seen=0;lastSt='RUNNING';JOBS=await api('/api/jobs');renderSide();renderOut();renderHist();await poll()}
+
+async function startCamp(){
+  const accounts=camp.accs.filter(a=>camp.sel[a.name]).map(a=>({name:a.name,bio:camp.opt.bio?(camp.bio[a.name]||''):'',do_dp:camp.opt.dp&&a.dp.length>0,
+    posts:camp.opt.post?String(camp.posts[a.name]||camp.gposts||'all'):0,private:camp.opt.priv}));
+  if(!accounts.length){toast('Pehle accounts select karo');return}
+  const p=plan();
+  if(!camp.pace.dry&&!confirm(`${p.n} accounts par: ${p.dp} DP, ${p.bio} bio, ${p.po} posts${camp.opt.priv?', private':''}.\nStart karein?`))return;
+  const r=await api('/api/camp/start',{method:'POST',body:JSON.stringify({accounts,auto_bio:camp.opt.bio,captions:camp.captions,dry:camp.pace.dry,
+    pacing:{parallel:camp.pace.parallel,fast:camp.pace.fast,post_gap_min:camp.pace.gmin,post_gap_max:camp.pace.gmax}})});
+  if(r.error){toast(r.error);return}
+  curJob=r.id;seen=0;lastSt='RUNNING';JOBS=await api('/api/jobs');renderSide();renderOut();renderHist();await poll();
+}
+
+/* ================= ACCOUNT HEALTH & STATUS ================= */
+async function loadHealth(){
+  await loadHealthCache();
+  renderHealth();
+}
+
+async function checkSingleAcc(name){
+  toast(`@${name} check ho raha hai...`);
+  const r=await api('/api/health/check',{method:'POST',body:JSON.stringify({name})});
+  if(r.error){toast(r.error);return}
+  await loadHealthCache();
+  renderHealth();renderSide();
+  toast(`@${name} status: ${r.status} (${r.detail||''})`);
+}
+
+async function checkAllAccs(){
+  if(HEALTH_PROG.checking){toast('Check pehle se chal raha hai');return}
+  toast('Sabhi accounts ka check shuru...');
+  await api('/api/health/check_all',{method:'POST',body:'{}'});
+  await loadHealthCache();
+  renderHealth();
+}
+
+async function removeAcc(name, reloadCamp=false){
+  if(!confirm(`Account '@${name}' ko hatana chahte hain?\n(Iski cookie file archived backup me safe chali jayegi)`)) return;
+  const r=await api('/api/health/remove',{method:'POST',body:JSON.stringify({name})});
+  if(r.error){toast(r.error);return}
+  toast(`@${name} hata diya gaya (archived)`);
+  await loadHealthCache();
+  if(reloadCamp || curTool==='__camp') loadCamp();
+  if(curTool==='__cm') loadRoster();
+  if(curTool==='__health') renderHealth();
+  renderSide();
+}
+
+async function removeSuspendedAccs(){
+  const sus = HEALTH_ACCS.filter(a => HEALTH_CACHE[a.name]?.status === 'SUSPENDED');
+  if(!sus.length){ toast('Koi suspended account nahi mila'); return; }
+  if(!confirm(`Kya aap sabhi ${sus.length} SUSPENDED accounts ko hatana chahte hain?\n\nAccounts: ${sus.map(a=>'@'+a.name).join(', ')}\n\n(Inki cookie files archived backup me safe save ho jayengi)`)) return;
+  const r = await api('/api/health/remove_by_status', {method: 'POST', body: JSON.stringify({status: ['SUSPENDED']})});
+  if(r.error){ toast(r.error); return; }
+  toast(`${Object.keys(r.report||{}).length} suspended accounts hata diye gaye!`);
+  await loadHealthCache();
+  if(curTool==='__camp') loadCamp();
+  if(curTool==='__cm') loadRoster();
+  renderHealth();
+  renderSide();
+}
+
+async function removeExpiredAccs(){
+  const exp = HEALTH_ACCS.filter(a => HEALTH_CACHE[a.name]?.status === 'EXPIRED');
+  if(!exp.length){ toast('Koi expired account nahi mila'); return; }
+  if(!confirm(`Kya aap sabhi ${exp.length} EXPIRED accounts ko hatana chahte hain?\n(Inhe dobara login karna padega)`)) return;
+  const r = await api('/api/health/remove_by_status', {method: 'POST', body: JSON.stringify({status: ['EXPIRED']})});
+  if(r.error){ toast(r.error); return; }
+  toast(`${Object.keys(r.report||{}).length} expired accounts hata diye gaye!`);
+  await loadHealthCache();
+  if(curTool==='__camp') loadCamp();
+  if(curTool==='__cm') loadRoster();
+  renderHealth();
+  renderSide();
+}
+
+function renderHealth(){
+  const t=$('#title'),s=$('#sub');
+  t.textContent='🛡️ Account Health & Profile Status';
+  s.textContent='Pata karo konsa account suspend hai, kiski cookies expire hui hain, kitni posts hain, DP lagi hai ya nahi, aur account Private hai ya Public';
+  const c=$('#formCard');
+  c.style.setProperty('--c','#00b4d8');
+
+  let total=HEALTH_ACCS.length, alive=0, suspended=0, expired=0, challenge=0, unchecked=0, errors=0;
+  let totalPosts=0, dpCount=0, privCount=0, pubCount=0;
+  for(const a of HEALTH_ACCS){
+    const h=HEALTH_CACHE[a.name];
+    if(!h||!h.status||h.status==='UNCHECKED') unchecked++;
+    else if(h.status==='ALIVE') {
+      alive++;
+      if(typeof h.posts==='number') totalPosts += h.posts;
+      if(h.has_dp) dpCount++;
+      if(h.is_private) privCount++; else pubCount++;
+    }
+    else if(h.status==='SUSPENDED') suspended++;
+    else if(h.status==='EXPIRED') expired++;
+    else if(h.status==='CHALLENGE') challenge++;
+    else errors++;
+  }
+  const issues = suspended + expired + challenge + errors;
+
+  let h=`<div class="camp">
+   <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+     <div class="stat-box" style="border-color:rgba(255,255,255,.15)"><div class="num">${total}</div><div class="lbl">Total Accounts</div></div>
+     <div class="stat-box" style="border-color:rgba(46,229,157,.4)"><div class="num" style="color:var(--ok)">${alive}</div><div class="lbl">🟢 Alive</div></div>
+     <div class="stat-box" style="border-color:rgba(255,92,122,.5)"><div class="num" style="color:var(--bad)">${suspended}</div><div class="lbl">🔴 Suspended</div></div>
+     <div class="stat-box" style="border-color:rgba(255,200,87,.5)"><div class="num" style="color:var(--warn)">${expired}</div><div class="lbl">🟡 Expired</div></div>
+     <div class="stat-box" style="border-color:rgba(0,180,216,.4)"><div class="num" style="color:#00b4d8">${totalPosts}</div><div class="lbl">📸 Total Posts</div></div>
+     <div class="stat-box" style="border-color:rgba(46,229,157,.4)"><div class="num" style="color:var(--ok)">${dpCount} <span style="font-size:12px;color:var(--mute)">/ ${alive}</span></div><div class="lbl">🖼️ DP Uploaded</div></div>
+     <div class="stat-box" style="border-color:rgba(186,104,200,.4)"><div class="num" style="color:#cf88ff;font-size:15px;margin-top:4px">${privCount} 🔒 / ${pubCount} 🌐</div><div class="lbl">Private / Public</div></div>
+   </div>`;
+
+  if(HEALTH_PROG.checking){
+    const pct = HEALTH_PROG.total ? Math.round((HEALTH_PROG.done / HEALTH_PROG.total) * 100) : 0;
+    h += `<div class="card" style="padding:12px;gap:6px;border-color:#00b4d8">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600">
+        <span class="ic">🔄</span> <b>Checking in progress:</b> ${HEALTH_PROG.done}/${HEALTH_PROG.total} accounts (${pct}%)
+        ${HEALTH_PROG.current ? `<span style="color:var(--mute)">Checking @${esc(HEALTH_PROG.current)}...</span>` : ''}
+      </div>
+      <div class="prog-bar-wrap"><div class="prog-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }
+
+  h += `<div class="bar">
+    <button class="btn sm" style="background:#00b4d8;color:#000;font-weight:700" onclick="checkAllAccs()" ${HEALTH_PROG.checking?'disabled':''}>🔍 Check All Accounts (${total})</button>
+    ${suspended ? `<button class="btn sm red" onclick="removeSuspendedAccs()">🗑️ Saare Suspended Hatao (${suspended})</button>` : ''}
+    ${expired ? `<button class="btn sm" style="color:var(--warn);border-color:var(--warn)" onclick="removeExpiredAccs()">🗑️ Expired Hatao (${expired})</button>` : ''}
+    <div style="flex:1"></div>
+    <input type="text" placeholder="Search account name / source..." value="${esc(healthSearch)}" oninput="healthSearch=this.value;renderHealth()" style="max-width:240px">
+  </div>`;
+
+  h += `<div class="tabs">
+    <div class="tab ${healthFilter==='all'?'on':''}" style="--c:#00b4d8" onclick="healthFilter='all';renderHealth()">All (${total})</div>
+    <div class="tab ${healthFilter==='alive'?'on':''}" style="--c:var(--ok)" onclick="healthFilter='alive';renderHealth()">🟢 Alive (${alive})</div>
+    <div class="tab ${healthFilter==='suspended'?'on':''}" style="--c:var(--bad)" onclick="healthFilter='suspended';renderHealth()">🔴 Suspended (${suspended})</div>
+    <div class="tab ${healthFilter==='expired'?'on':''}" style="--c:var(--warn)" onclick="healthFilter='expired';renderHealth()">🟡 Expired (${expired})</div>
+    <div class="tab ${healthFilter==='issues'?'on':''}" style="--c:var(--bad)" onclick="healthFilter='issues';renderHealth()">⚠️ Issues (${issues})</div>
+    <div class="tab ${healthFilter==='no_dp'?'on':''}" style="--c:var(--warn)" onclick="healthFilter='no_dp';renderHealth()">🖼️ No DP (${alive - dpCount})</div>
+    <div class="tab ${healthFilter==='private'?'on':''}" style="--c:#cf88ff" onclick="healthFilter='private';renderHealth()">🔒 Private (${privCount})</div>
+    <div class="tab ${healthFilter==='unchecked'?'on':''}" style="--c:var(--mute)" onclick="healthFilter='unchecked';renderHealth()">⚪ Unchecked (${unchecked})</div>
+  </div>`;
+
+  let filtered = HEALTH_ACCS.filter(a => {
+    if(healthSearch && !a.name.toLowerCase().includes(healthSearch.toLowerCase()) && !(a.source||'').toLowerCase().includes(healthSearch.toLowerCase())) return false;
+    const s = (HEALTH_CACHE[a.name]?.status) || 'UNCHECKED';
+    const hc = HEALTH_CACHE[a.name] || {};
+    if(healthFilter==='alive') return s==='ALIVE';
+    if(healthFilter==='suspended') return s==='SUSPENDED';
+    if(healthFilter==='expired') return s==='EXPIRED';
+    if(healthFilter==='unchecked') return s==='UNCHECKED';
+    if(healthFilter==='issues') return (s==='SUSPENDED'||s==='EXPIRED'||s==='CHALLENGE'||s==='PROXY_ERROR'||s==='ERROR'||s==='BAD_FILE'||s==='NO_SESSION');
+    if(healthFilter==='no_dp') return s==='ALIVE' && !hc.has_dp;
+    if(healthFilter==='private') return s==='ALIVE' && hc.is_private;
+    return true;
+  });
+
+  if(!filtered.length){
+    h += `<div class="empty">Koi account match nahi hua (${healthFilter} filter me)</div>`;
+  } else {
+    h += `<div class="card" style="padding:0;overflow:auto"><table class="h-table">
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Status</th>
+          <th>📸 Posts</th>
+          <th>🖼️ DP Status</th>
+          <th>🔒 Type</th>
+          <th>👥 Followers</th>
+          <th>Details / Reason</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>`;
+    for(const a of filtered){
+      const hc = HEALTH_CACHE[a.name];
+      const s = hc?.status || 'UNCHECKED';
+      const detail = hc?.detail || 'Abhi check nahi hua';
+      const isAlive = (s === 'ALIVE');
+
+      // Posts column
+      let postHtml = '<span style="color:var(--mute)">-</span>';
+      if(isAlive && typeof hc.posts === 'number'){
+        postHtml = `<b style="color:var(--txt)">${hc.posts}</b> <span style="font-size:11px;color:var(--mute)">post${hc.posts===1?'':'s'}</span>`;
+      }
+
+      // DP column
+      let dpHtml = '<span style="color:var(--mute)">-</span>';
+      if(isAlive && typeof hc.has_dp === 'boolean'){
+        dpHtml = hc.has_dp
+          ? `<span class="badge" style="background:rgba(46,229,157,.15);color:var(--ok);border:1px solid rgba(46,229,157,.4)">✅ DP Set</span>`
+          : `<span class="badge" style="background:rgba(255,200,87,.15);color:var(--warn);border:1px solid rgba(255,200,87,.4)">❌ No DP</span>`;
+      }
+
+      // Privacy column
+      let privHtml = '<span style="color:var(--mute)">-</span>';
+      if(isAlive && typeof hc.is_private === 'boolean'){
+        privHtml = hc.is_private
+          ? `<span class="badge" style="background:rgba(186,104,200,.15);color:#cf88ff;border:1px solid rgba(186,104,200,.4)">🔒 Private</span>`
+          : `<span class="badge" style="background:rgba(0,180,216,.15);color:#00b4d8;border:1px solid rgba(0,180,216,.4)">🌐 Public</span>`;
+      }
+
+      // Followers column
+      let folHtml = '<span style="color:var(--mute)">-</span>';
+      if(isAlive && typeof hc.followers === 'number'){
+        folHtml = `<span style="font-size:11px"><b style="color:var(--txt)">${hc.followers}</b> <span style="color:var(--mute)">fol</span> / <b style="color:var(--txt)">${hc.following||0}</b> <span style="color:var(--mute)">fng</span></span>`;
+      }
+
+      h += `<tr>
+        <td>
+          <b>@${esc(a.name)}</b><br>
+          <small style="color:var(--mute)">${esc(a.source||'cookies')}</small>
+        </td>
+        <td>${hBadge(a.name)}</td>
+        <td>${postHtml}</td>
+        <td>${dpHtml}</td>
+        <td>${privHtml}</td>
+        <td>${folHtml}</td>
+        <td><span style="font-size:12px;color:${s==='SUSPENDED'?'var(--bad)':s==='EXPIRED'?'var(--warn)':s==='ALIVE'?'var(--ok)':'var(--mute)'}">${esc(detail)}</span></td>
+        <td><div style="display:flex;gap:6px"><button class="btn sm" onclick="checkSingleAcc('${esc(a.name)}')">🔍 Check</button><button class="btn sm red" onclick="removeAcc('${esc(a.name)}')">🗑️ Hatao</button></div></td>
+      </tr>`;
+    }
+    h += `</tbody></table></div>`;
+  }
+
+  h += `</div>`;
+  c.innerHTML = h;
+}
+</script>
+</body>
+</html>

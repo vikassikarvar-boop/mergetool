@@ -1,0 +1,9 @@
+{
+  "accounts": [
+    {
+      "name": "sample_account_1",
+      "cookies": "cookies/account1.json",
+      "proxy": "http://USERNAME:PASSWORD_country-in_session-RANDOM01_lifetime-59m@geo.iproyal.com:12321"
+    }
+  ]
+}

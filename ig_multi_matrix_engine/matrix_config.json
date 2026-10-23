@@ -1,0 +1,205 @@
+{
+  "general": {
+    "activity_windows": [
+      [
+        "00:00",
+        "03:00"
+      ],
+      [
+        "08:00",
+        "13:30"
+      ],
+      [
+        "14:00",
+        "18:30"
+      ],
+      [
+        "19:30",
+        "23:59"
+      ]
+    ],
+    "filler_every_seconds": [
+      45,
+      90
+    ],
+    "post_block_cooldown_min": 60
+  },
+  "accounts": [
+    {
+      "id": 1,
+      "name": "camel.58963911",
+      "cookies": "cookies/cookies_camel.58963911.json",
+      "profile": "custom_10L_5C",
+      "description": "10 Likes + 5 Comments per day",
+      "target_24h": {
+        "like": 10,
+        "comment": 5,
+        "seen": 0
+      },
+      "sessions_per_day": [
+        2,
+        2
+      ],
+      "actions_per_session": {
+        "like": [
+          5,
+          5
+        ],
+        "comment": [
+          2,
+          3
+        ]
+      },
+      "session_duration_minutes": [
+        25,
+        35
+      ],
+      "action_interval_seconds": {
+        "like": [
+          140,
+          220
+        ],
+        "comment": [
+          180,
+          280
+        ]
+      },
+      "dwell_seconds": {
+        "like": [
+          8.0,
+          20.0
+        ],
+        "comment": [
+          25.0,
+          60.0
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "name": "chameleon.3970994",
+      "cookies": "cookies/cookies_chameleon.3970994.json",
+      "profile": "custom_15L_7C",
+      "description": "15 Likes + 7 Comments per day",
+      "target_24h": {
+        "like": 15,
+        "comment": 7,
+        "seen": 0
+      },
+      "sessions_per_day": [
+        3,
+        3
+      ],
+      "actions_per_session": {
+        "like": [
+          5,
+          5
+        ],
+        "comment": [
+          2,
+          3
+        ]
+      },
+      "session_duration_minutes": [
+        30,
+        40
+      ],
+      "action_interval_seconds": {
+        "like": [
+          140,
+          220
+        ],
+        "comment": [
+          180,
+          280
+        ]
+      },
+      "dwell_seconds": {
+        "like": [
+          8.0,
+          20.0
+        ],
+        "comment": [
+          25.0,
+          60.0
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "name": "chipmunk.3410603",
+      "cookies": "cookies/cookies_chipmunk.3410603.json",
+      "profile": "custom_5C",
+      "description": "Comment Only (5 Comments per day)",
+      "target_24h": {
+        "like": 0,
+        "comment": 5,
+        "seen": 0
+      },
+      "sessions_per_day": [
+        2,
+        2
+      ],
+      "actions_per_session": {
+        "comment": [
+          2,
+          3
+        ]
+      },
+      "session_duration_minutes": [
+        15,
+        25
+      ],
+      "action_interval_seconds": {
+        "comment": [
+          200,
+          320
+        ]
+      },
+      "dwell_seconds": {
+        "comment": [
+          25.0,
+          60.0
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "name": "social4594",
+      "cookies": "cookies/cookies_social4594.json",
+      "profile": "comment_only_50_1h",
+      "description": "Comment Only (50 + 50 = 100 comments per day)",
+      "target_24h": {
+        "like": 0,
+        "comment": 100,
+        "seen": 0
+      },
+      "sessions_per_day": [
+        2,
+        2
+      ],
+      "actions_per_session": {
+        "comment": [
+          50,
+          50
+        ]
+      },
+      "session_duration_minutes": [
+        55,
+        65
+      ],
+      "action_interval_seconds": {
+        "comment": [
+          55,
+          75
+        ]
+      },
+      "dwell_seconds": {
+        "comment": [
+          10.0,
+          25.0
+        ]
+      }
+    }
+  ]
+}

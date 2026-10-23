@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IG Tools Panel</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2d3646;
+    --text:#e6edf3; --muted:#8b98a9; --accent:#4f8cff; --green:#2ea043;
+    --red:#f85149; --yellow:#d29922; --blue:#58a6ff; --mono:Consolas,'Courier New',monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{background:var(--bg); color:var(--text); font-family:Segoe UI,system-ui,sans-serif; font-size:14px}
+  .wrap{display:flex; min-height:100vh}
+  /* sidebar */
+  .side{width:210px; background:var(--panel); border-right:1px solid var(--border); padding:16px 10px; flex-shrink:0}
+  .logo{font-size:16px; font-weight:700; padding:6px 10px 16px; color:var(--blue)}
+  .logo small{display:block; color:var(--muted); font-weight:400; font-size:11px; margin-top:2px}
+  .navbtn{display:block; width:100%; text-align:left; background:none; border:none; color:var(--muted);
+    padding:10px 12px; border-radius:8px; cursor:pointer; font-size:14px; margin-bottom:2px}
+  .navbtn:hover{background:var(--panel2); color:var(--text)}
+  .navbtn.active{background:#21324d; color:#9cc2ff; font-weight:600}
+  /* main */
+  .main{flex:1; padding:22px 26px; max-width:1100px}
+  h1{font-size:19px; margin-bottom:4px}
+  .sub{color:var(--muted); margin-bottom:18px; font-size:13px}
+  .tab{display:none} .tab.active{display:block}
+  /* form */
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:18px; margin-bottom:16px}
+  .frow{margin-bottom:13px}
+  label{display:block; font-size:12.5px; color:var(--muted); margin-bottom:5px; font-weight:600}
+  label .req{color:var(--red)}
+  input[type=text],input[type=password],select{width:100%; padding:9px 11px; background:var(--bg);
+    border:1px solid var(--border); border-radius:7px; color:var(--text); font-size:13.5px}
+  input:focus,select:focus{outline:none; border-color:var(--accent)}
+  .hint{font-size:11.5px; color:var(--muted); margin-top:4px}
+  .checkrow{display:flex; align-items:center; gap:8px}
+  .checkrow input{width:16px; height:16px}
+  .checkrow label{margin:0; font-weight:400; color:var(--text)}
+  .btn{background:var(--accent); color:#fff; border:none; padding:11px 26px; border-radius:8px;
+    font-size:14.5px; font-weight:600; cursor:pointer}
+  .btn:hover{background:#3a76e8}
+  .btn:disabled{background:#333c4a; color:#77839a; cursor:not-allowed}
+  .btn.sm{padding:6px 13px; font-size:12.5px}
+  .btn.danger{background:#8b2c2c} .btn.danger:hover{background:#a33}
+  /* console */
+  .console{background:#080b10; border:1px solid var(--border); border-radius:10px; padding:14px;
+    font-family:var(--mono); font-size:12.5px; line-height:1.55; height:420px; overflow-y:auto; white-space:pre-wrap; word-break:break-word}
+  .console .l-ok{color:#57d977} .console .l-bad{color:#ff6b63} .console .l-warn{color:#e5c05c}
+  .console .l-info{color:#79b8ff} .console .l-dim{color:#7d8899}
+  .badge{display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; margin-left:10px}
+  .b-SUCCESS{background:#12351f; color:#4ade80} .b-WRONG_PASSWORD{background:#3d2410; color:#fbbf24}
+  .b-NOT_FOUND{background:#2a2f38; color:#aab6c6} .b-RECOVERY{background:#3d1414; color:#f87171}
+  .b-CHALLENGE{background:#3d3310; color:#fcd34d} .b-THROTTLED{background:#102a3d; color:#7dd3fc}
+  .b-FAILED{background:#3d1414; color:#f87171} .b-RUNNING{background:#102a3d; color:#7dd3fc}
+  .b-SUSPENDED{background:#3d1414; color:#f87171} .b-2FA_FAIL{background:#3d2410; color:#fbbf24}
+  .b-DIAGNOSED{background:#3d2410; color:#fbbf24} .b-EXIT_-1,.b-EXIT_{background:#3d1414; color:#f87171}
+  .b-GENERIC_ERROR{background:#3d1414; color:#f87171} .b-FALLBACK{background:#3d3310; color:#fcd34d}
+  /* table */
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th{text-align:left; color:var(--muted); font-size:11.5px; text-transform:uppercase; padding:8px 10px; border-bottom:1px solid var(--border)}
+  td{padding:9px 10px; border-bottom:1px solid #20283a}
+  tr:hover td{background:var(--panel2)}
+  .lnk{color:var(--blue); cursor:pointer; text-decoration:none} .lnk:hover{text-decoration:underline}
+  .muted{color:var(--muted)}
+  .modal{position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center; z-index:50}
+  .modal.open{display:flex}
+  .modal .box{background:var(--panel); border:1px solid var(--border); border-radius:12px; width:min(860px,94vw); max-height:88vh; display:flex; flex-direction:column}
+  .modal .hd{padding:14px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center}
+  .modal .bd{padding:14px 18px; overflow-y:auto}
+  .x{background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media(max-width:760px){ .grid2{grid-template-columns:1fr} .side{width:64px} .side .logo,.navbtn span.t{display:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="side">
+    <div class="logo">⚡ IG Tools Panel<small>local control center</small></div>
+    <button class="navbtn active" data-tab="login">🔑 <span class="t">Login</span></button>
+    <button class="navbtn" data-tab="tools">🧰 <span class="t">Baaki Tools</span></button>
+    <button class="navbtn" data-tab="history">🕘 <span class="t">History</span></button>
+    <button class="navbtn" data-tab="cookies">🍪 <span class="t">Cookies</span></button>
+    <button class="navbtn" data-tab="help">❓ <span class="t">Help</span></button>
+  </div>
+
+  <div class="main">
+    <!-- ============ LOGIN TAB ============ -->
+    <div class="tab active" id="tab-login">
+      <h1>Instagram Login <span id="loginBadge"></span></h1>
+      <div class="sub">Form bharo → "Login Chalao" dabao → live output niche dikhega. Command yaad rakhne ki zaroorat nahi.</div>
+      <div class="card">
+        <div class="grid2">
+          <div class="frow"><label>Username <span class="req">*</span></label>
+            <input type="text" id="f_username" placeholder="jaise social4594" autocomplete="off"></div>
+          <div class="frow"><label>Password <span class="req">*</span></label>
+            <input type="password" id="f_password" placeholder="account ka password"></div>
+        </div>
+        <div class="frow"><label>TOTP Secret (2FA wale accounts ke liye)</label>
+          <input type="text" id="f_totp" placeholder="4BOY TBGK RGUO GCS6 ... (spaces chalega)" autocomplete="off">
+          <div class="hint">Authenticator ki base32 key — 2FA code panel khud generate karega</div></div>
+        <div class="grid2">
+          <div class="frow"><label>Country</label>
+            <select id="f_country"><option value="" selected>AUTO (proxy se detect)</option><option>IN</option><option>PH</option><option>US_EST</option><option>US_PST</option><option>UK</option></select>
+            <div class="hint">AUTO = proxy URL se country detect (_country-in / cr.in); bina proxy = IN</div></div>
+          <div class="frow"><label>Proxy (optional)</label>
+            <input type="text" id="f_proxy" placeholder="http://user:pass@gw.dataimpulse.com:10005" autocomplete="off">
+            <div class="hint">Khali = apni direct IP. STICKY: DataImpulse 10000-20000 ya IPRoyal :12321 (rotating = 429)</div></div>
+        </div>
+        <div class="frow"><label>App Profile (version identity)</label>
+          <select id="f_profile"><option value="449" selected>449 — DEFAULT (consistent identity)</option><option value="451">451 — experimental</option><option value="448">448 — purana</option></select>
+          <div class="hint">449 = consistent (templates ka bloks hash 449 ka + instagrapi default + Pixel 8 Pro device auto). Oct 2026 repo research ke baad ye hi recommended hai</div></div>
+        <div class="frow"><label>TLS engine (fingerprint)</label>
+          <select id="f_tls"><option value="auto" selected>auto — uTLS agar installed (RECOMMENDED)</option><option value="curl">curl — force uTLS: HTTP/2 + TLS1.3 + app curves</option><option value="requests">requests — classic HTTP/1.1</option></select>
+          <div class="hint">Proxy pe send_login <b>429 (0B)</b> = TLS fingerprint block. Fix: <b>pip install "curl_cffi&gt;=0.15.0"</b> — phir auto hi uTLS use karega (instagrapi 19 Oct 2026 wala transport)</div></div>
+        <div class="grid2">
+          <div class="frow"><label>Output filename (optional)</label>
+            <input type="text" id="f_output" placeholder="cookies_username.json (default)" autocomplete="off"></div>
+          <div class="frow"><label>&nbsp;</label>
+            <div class="checkrow"><input type="checkbox" id="f_web"><label for="f_web">Web cookies bhi lao (csrftoken) — sirf web-automation ke liye</label></div>
+            <div class="checkrow"><input type="checkbox" id="f_force"><label for="f_force">Force — cooldown lock ignore (GENERIC_ERROR/FALLBACK/429 ke baad lock lagta hai; recommended NAHI)</label></div></div>
+        </div>
+        <button class="btn" id="btnLogin">▶ Login Chalao</button>
+        <span class="muted" id="loginTime"></span>
+      </div>
+      <div class="console" id="loginConsole">Output yahan live aayega...</div>
+    </div>
+
+    <!-- ============ TOOLS TAB ============ -->
+    <div class="tab" id="tab-tools">
+      <h1>Baaki Tools</h1>
+      <div class="sub">Registry (tools.json) se loaded — naya tool add karna ho to bas usme entry daalo, yahan khud dikhega.</div>
+      <div class="card">
+        <div class="frow"><label>Tool chuno</label><select id="toolSel"></select>
+          <div class="hint" id="toolDesc"></div></div>
+        <div id="toolFields"></div>
+        <button class="btn" id="btnTool">▶ Chalao</button>
+      </div>
+      <div class="console" id="toolConsole">Output yahan live aayega...</div>
+    </div>
+
+    <!-- ============ HISTORY TAB ============ -->
+    <div class="tab" id="tab-history">
+      <h1>History</h1>
+      <div class="sub">Panel se chalaye gaye saare jobs (latest pehle). Row par click karke poora output dekho.</div>
+      <div class="card" style="padding:6px">
+        <table><thead><tr><th>Time</th><th>Tool</th><th>Username</th><th>Status</th><th>Exit</th><th>Duration</th></tr></thead>
+        <tbody id="histBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ============ COOKIES TAB ============ -->
+    <div class="tab" id="tab-cookies">
+      <h1>Cookies Files</h1>
+      <div class="sub">Login success hone par bani session files. ⚠️ Inhe kabhi kisi ko mat bhejo — ye account ki chaabi hain.</div>
+      <div class="card" style="padding:6px">
+        <table><thead><tr><th>File</th><th>Username</th><th>User ID</th><th>Session</th><th>Modified</th><th>Size</th><th></th></tr></thead>
+        <tbody id="ckBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ============ HELP TAB ============ -->
+    <div class="tab" id="tab-help">
+      <h1>Help / Guide</h1>
+      <div class="sub">Chhoti-moti baatein jo baar-baar kaam aayengi</div>
+      <div class="card">
+        <h3 style="margin-bottom:8px">🚀 Panel start karna</h3>
+        <p class="muted" style="line-height:1.7">Windows: <b>run_panel.bat</b> double-click karo → browser me http://127.0.0.1:8765 khul jayega.<br>
+        Manual: <code>pip install flask requests pycryptodomex</code> phir <code>python panel.py</code></p>
+        <h3 style="margin:16px 0 8px">🔑 Login tips</h3>
+        <ul class="muted" style="line-height:1.8; padding-left:20px">
+          <li><b>Country</b> wahi chuno jis country ka account hai (ya proxy jis country ka hai)</li>
+          <li><b>Proxy STICKY hona chahiye</b> — DataImpulse: ports 10000-20000 sticky hote hain (1-120 min, default 30); port 823 bina <code>;sessid.X</code> ke per-request rotate karta hai (login ke liye bekaar)</li>
+          <li><b>Old tool wala IPRoyal gateway bhi chalega</b>: <code>http://USER:PASS_country-in_session-XYZ_lifetime-30m@geo.iproyal.com:12321</code> — country URL se AUTO detect hoti hai</li>
+          <li><b>IN account = IN exit IP</b> — proxy country account se match na hui to GENERIC_ERROR/risk-block pakka</li>
+          <li><b>App Profile 449 = DEFAULT</b>: Oct 2026 repo research — instagrapi (aaj push hua) + instagram-cli PR#390 dono 449.0.0.52.84 chalate hain; hamare templates ka bloks hash bhi 449 ka = consistent identity. Device Pixel 8 Pro (Android 14) auto-apply — purane Android 8/9 devices par 449 app install hi nahi hota (mismatch = risk flag)</li>
+          <li><b>Trust signals (naya)</b>: USDID registration (X-Meta-Usdid signed header) + FRESH attestation nonce har run me — pehle September-captured STALE nonce ja raha tha jo IG ke liye bada red flag tha</li>
+          <li>Fresh sticky session chahiye to username me <code>;sessid.kuchbhi-naya</code> add karo</li>
+          <li><b>THROTTLED (429)</b> aaye to 45-60 min wait karo — baar-baar retry cooldown badhata hai</li>
+          <li><b>2FA_FAIL</b> aaye to script folder me bani <code>debug_2fa_response.json</code> file ka content share karo</li>
+          <li>needs_upgrade wali line PATH A (legacy) ki hai — IGNORE karo, PATH B hi asli login hai</li>
+        </ul>
+        <h3 style="margin:16px 0 8px">🧰 Naya tool connect karna</h3>
+        <p class="muted" style="line-height:1.7">tools.json kholo → "tools" array me nayi entry daalo (id, label, script, fields, status_rules) → panel refresh karo. Bas. Script usi folder me honi chahiye.</p>
+        <h3 style="margin:16px 0 8px">📊 Status ka matlab</h3>
+        <ul class="muted" style="line-height:1.8; padding-left:20px">
+          <li><span class="badge b-SUCCESS">SUCCESS</span> session mil gayi — Cookies tab me file dikhegi</li>
+          <li><span class="badge b-WRONG_PASSWORD">WRONG_PASSWORD</span> IG ne password reject kiya — sahi password check karo</li>
+          <li><span class="badge b-NOT_FOUND">NOT_FOUND</span> username exist nahi karta</li>
+          <li><span class="badge b-RECOVERY">RECOVERY</span> account disabled ya recovery-funnel — fresh proxy/IP se ek baar retry</li>
+          <li><span class="badge b-THROTTLED">THROTTLED</span> IP/account par rate-limit — 45-60 min wait</li>
+          <li><span class="badge b-GENERIC_ERROR">GENERIC_ERROR</span> IG ka risk-block ("Unable to log in / unexpected error") — password sahi hota hai; aaj attempts band, phone app se login verify, overnight baad ek retry</li>
+          <li><span class="badge b-FALLBACK">FALLBACK</span> IG ne flow dead legacy endpoint par bheja (soft-refusal) — 45-60 min wait, ek retry home IP se</li>
+          <li><b>COOLDOWN LOCK</b>: GENERIC_ERROR ke baad 12h, FALLBACK ke baad 1h, 429 ke baad 45min auto-lock (cooldowns.json) — beech me chalane par tool khud rok deta hai; Force = bypass (recommended nahi)</li>
+          <li><span class="badge b-SUSPENDED">SUSPENDED</span> session mili lekin account restricted — use nahi hogi</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal for history output -->
+<div class="modal" id="modal"><div class="box">
+  <div class="hd"><b id="mTitle">Output</b><button class="x" onclick="document.getElementById('modal').classList.remove('open')">✕</button></div>
+  <div class="bd"><div class="console" id="mConsole" style="height:auto; max-height:66vh"></div></div>
+</div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let TOOLS=null, activeES=null;
+
+// ---- tabs ----
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); $('tab-'+b.dataset.tab).classList.add('active');
+  if(b.dataset.tab==='history') loadHistory();
+  if(b.dataset.tab==='cookies') loadCookies();
+});
+
+// ---- console helpers ----
+function lineClass(l){
+  if(/SUCCESS|\[SESSION VALID\]|200 /.test(l)) return 'l-ok';
+  if(/429|FAILED|ERROR|WRONG|error|Traceback|404/.test(l)) return 'l-bad';
+  if(/WARN|warning|RECOVERY|CHALLENGE|skip/.test(l)) return 'l-warn';
+  if(/^\[|>>|EXIT/.test(l)) return 'l-info';
+  if(/^\s*$/.test(l)) return 'l-dim';
+  return '';
+}
+function appendLine(con,l){
+  const d=document.createElement('div'); d.className=lineClass(l); d.textContent=l;
+  con.appendChild(d); con.scrollTop=con.scrollHeight;
+}
+function setConsole(con,txt){ con.innerHTML=''; txt.split('\n').forEach(l=>appendLine(con,l)); }
+
+// ---- run job with SSE ----
+function runJob(toolId,params,con,badge,bt){
+  if(activeES){activeES.close();activeES=null;}
+  con.innerHTML=''; bt.disabled=true; badge.innerHTML='<span class="badge b-RUNNING">RUNNING…</span>';
+  fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({tool:toolId,params})})
+  .then(r=>r.json()).then(j=>{
+    if(j.error){ appendLine(con,'[panel] '+j.error); bt.disabled=false; badge.innerHTML=''; return; }
+    const es=new EventSource('/api/stream/'+j.job_id); activeES=es;
+    es.onmessage=e=>{
+      const m=JSON.parse(e.data);
+      if(m.t==='line') appendLine(con,m.v);
+      else if(m.t==='done'){
+        es.close(); activeES=null; bt.disabled=false;
+        badge.innerHTML='<span class="badge b-'+m.status+'">'+m.status+'</span>';
+        $('loginTime').textContent=' ('+m.duration+'s, exit '+m.exit_code+')';
+        loadCookies();
+      }
+    };
+    es.onerror=()=>{es.close();bt.disabled=false;};
+  }).catch(e=>{appendLine(con,'[panel error] '+e); bt.disabled=false;});
+}
+
+// ---- LOGIN tab ----
+$('btnLogin').onclick=()=>{
+  const p={username:$('f_username').value.trim(), password:$('f_password').value,
+    totp:$('f_totp').value.trim(), country:$('f_country').value,
+    proxy:$('f_proxy').value.trim(), output:$('f_output').value.trim(),
+    web:$('f_web').checked?'1':'', force:$('f_force').checked?'1':'',
+    app_profile:$('f_profile').value, tls:$('f_tls').value};
+  if(!p.username||!p.password){alert('Username aur password zaroori hai');return;}
+  runJob('login',p,$('loginConsole'),$('loginBadge'),$('btnLogin'));
+};
+
+// ---- TOOLS tab (registry-driven) ----
+function renderToolForm(t){
+  $('toolDesc').textContent=t.desc||'';
+  const box=$('toolFields'); box.innerHTML='';
+  (t.fields||[]).forEach(f=>{
+    const row=document.createElement('div'); row.className='frow';
+    let inp;
+    if(f.type==='select'){
+      inp=document.createElement('select'); (f.options||[]).forEach(o=>{const op=document.createElement('option');op.textContent=o;inp.appendChild(op);});
+    } else if(f.type==='flag'){
+      row.innerHTML='<div class="checkrow"><input type="checkbox" id="tf_'+f.name+'"><label for="tf_'+f.name+'">'+f.label+'</label></div>'+
+        (f.help?'<div class="hint">'+f.help+'</div>':'');
+      box.appendChild(row); return;
+    } else {
+      inp=document.createElement('input'); inp.type=(f.type==='password'?'password':'text');
+      inp.placeholder=f.ph||''; inp.autocomplete='off';
+    }
+    inp.id='tf_'+f.name;
+    row.innerHTML='<label>'+f.label+(f.required?' <span class="req">*</span>':'')+'</label>';
+    row.appendChild(inp);
+    if(f.help){const h=document.createElement('div');h.className='hint';h.textContent=f.help;row.appendChild(h);}
+    box.appendChild(row);
+  });
+}
+$('btnTool').onclick=()=>{
+  const t=TOOLS.tools.find(x=>x.id===$('toolSel').value); if(!t)return;
+  const p={};
+  (t.fields||[]).forEach(f=>{
+    const el=$('tf_'+f.name); if(!el)return;
+    p[f.name]=(f.type==='flag')?(el.checked?'1':''):el.value;
+  });
+  runJob(t.id,p,$('toolConsole'),{innerHTML:''},$('btnTool'));
+};
+
+// ---- HISTORY ----
+function loadHistory(){
+  fetch('/api/jobs').then(r=>r.json()).then(js=>{
+    const tb=$('histBody'); tb.innerHTML='';
+    js.forEach(j=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML='<td class="muted">'+(j.when||'')+'</td><td>'+(j.label||j.tool)+'</td><td><b>'+(j.username||'-')+'</b></td>'+
+        '<td><span class="badge b-'+j.status+'">'+j.status+'</span></td><td class="muted">'+j.exit_code+'</td><td class="muted">'+j.duration+'s</td>';
+      tr.style.cursor='pointer';
+      tr.onclick=()=>{ fetch('/api/jobs?id='+j.id).then(r=>r.json()).then(rec=>{
+        $('mTitle').textContent=(rec.username||rec.tool||'Job')+' — '+(rec.status||'');
+        setConsole($('mConsole'),(rec.all_lines||[]).join('\n'));
+        $('modal').classList.add('open'); }); };
+      tb.appendChild(tr);
+    });
+    if(!js.length) tb.innerHTML='<tr><td colspan="6" class="muted">Abhi koi history nahi</td></tr>';
+  });
+}
+
+// ---- COOKIES ----
+function loadCookies(){
+  fetch('/api/cookies').then(r=>r.json()).then(cs=>{
+    const tb=$('ckBody'); tb.innerHTML='';
+    cs.forEach(c=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML='<td><b>'+c.file+'</b></td><td>'+(c.username||'-')+'</td><td class="muted">'+(c.user_id||'-')+'</td>'+
+        '<td>'+(c.has_session?'<span class="badge b-SUCCESS">ALIVE</span>':'<span class="badge b-FAILED">NO SESSION</span>')+'</td>'+
+        '<td class="muted">'+(c.mtime||'')+'</td><td class="muted">'+Math.round((c.size||0)/1024)+'KB</td>'+
+        '<td><a class="lnk" href="/api/cookies/download/'+c.file+'">download</a> · '+
+        '<span class="lnk" style="color:#f87171" onclick="delCk(\''+c.file+'\')">delete</span></td>';
+      tb.appendChild(tr);
+    });
+    if(!cs.length) tb.innerHTML='<tr><td colspan="7" class="muted">Koi cookies file nahi — login success hone par yahan dikhegi</td></tr>';
+  });
+}
+function delCk(f){ if(confirm(f+' delete karni hai?')) fetch('/api/cookies/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:f})}).then(loadCookies); }
+
+// ---- init ----
+fetch('/api/tools').then(r=>r.json()).then(t=>{
+  TOOLS=t;
+  const sel=$('toolSel'); sel.innerHTML='';
+  t.tools.filter(x=>x.id!=='login').forEach(x=>{
+    const o=document.createElement('option'); o.value=x.id; o.textContent=x.label; sel.appendChild(o);
+  });
+  sel.onchange=()=>renderToolForm(t.tools.find(x=>x.id===sel.value));
+  if(sel.value) renderToolForm(t.tools.find(x=>x.id===sel.value));
+});
+loadCookies();
+</script>
+</body>
+</html>
